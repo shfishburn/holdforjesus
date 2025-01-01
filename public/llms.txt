@@ -1,0 +1,327 @@
+# Hold for Jesus — llms.txt
+
+> Hold for Jesus is a split-brain web application: one half is a multi-faith comedic AI prayer hotline where celestial customer service agents process prayers as helpdesk tickets; the other half is a sincere humanitarian data observatory and crisis resource hub. Together they explore how AI chatbots should — and shouldn't — handle spiritual questions, and why comedy and compassion aren't opposites.
+
+## The Split Brain
+
+The site is built on a deliberate tonal duality. Satirical comedy and sincere data/resources coexist in the same application, and both halves make the other stronger.
+
+The navigation reflects this explicitly:
+
+| Group | Label | Pages | Tone |
+|-------|-------|-------|------|
+| The Hotline | Satirical | Home, Pray, Community, History | Warm corporate-divine comedy |
+| The Real World | Sincere | Global Pain Index, AI Incidents, Crisis Help | No satire — real data, real help |
+
+Why it works: The satire targets the absurdity of a chatbot handling spiritual questions — not faith itself, and not suffering. The sincere pages exist as moral counterweights: "This is why we built a comedy hotline. Because sometimes the only honest response to numbers like these is to laugh — and then do something."
+
+The Community page occupies an intentional middle ground — framed as a sincere anonymous space ("not part of the satire") where users can share real reflections, light candles, and add voices to global causes.
+
+---
+
+## The Satirical Half — The Divine Hotline
+
+### Concept
+
+Prayer is reframed as a helpdesk ticket processed by "heavenly customer service." Each faith tradition gets a unique hotline, phone number, AI persona, departments, and closing prayer style.
+
+### Six Faith Traditions
+
+| Faith | Hotline Name | Phone | Voice Inspiration | Manager |
+|-------|-------------|-------|-------------------|---------|
+| Christianity | Hold for Jesus | 1-800-JESUS | C.S. Lewis — warm, literary, witty | Jesus (Employee of the Millennium) |
+| Islam | Hold for Allah | 1-800-SALAM | Rumi — poetic mysticism + mercy | Jibril (Head of Angelic Communications) |
+| Judaism | Hold for Hashem | 1-800-SHALOM | Jewish grandmother + Talmudic wit | Moses (Senior VP of Exodus Operations) |
+| Hinduism | Hold for Brahman | 1-800-DHARMA | Bhagavad Gita teacher + cosmic warmth | Ganesha (Chief Obstacle Removal Officer) |
+| Buddhism | Hold for Enlightenment | 1-800-SANGHA | Thich Nhat Hanh — gentle, present | Avalokiteshvara (Head of Compassion, 1000 arms) |
+| Secular | Hold for Reason | 1-800-THINK | Carl Sagan — cosmic wonder + humanism | Carl Sagan's Ghost (Pale Blue Dot Division) |
+
+### Departments Per Faith
+
+Each tradition has 4 themed departments that lean into the corporate satire:
+
+- Christianity: NT Customer Care, OT Complaints, Saints Help Desk, Hard Questions Desk
+- Islam: General Guidance, Fiqh Helpline, Sufi Poetry Desk, Whispers & Doubt Desk
+- Judaism: General Wisdom, Talmudic Debates, Bubbe's Advice, Inner Struggle Desk
+- Hinduism: General Dharma, Karma Accounting, Bhakti Devotion, Darkness & Dharma Desk
+- Buddhism: General Wisdom, Zen Koans Desk, Metta Meditation, Illusion & Clarity Desk
+- Secular: General Wisdom, Stoic Support, Existential Help, Cognitive Clarity Desk
+
+### Prayer Categories
+
+Four optional categories modify the AI's response tone: Gratitude, Guidance, Complaint, Emergency.
+
+### The User Flow
+
+1. Choose faith tradition — sets persona, hotline branding, closing prayer style
+2. Select department (optional) — adds sub-prompt layer
+3. Pick category (optional) — further tunes response tone
+4. Write prayer (max 500 characters)
+5. Hold screen with animated hold experience, faith-specific rotating messages, selectable hold music (Harps, Gospel, Gregorian via Web Audio API), and verse of the day
+6. Receive AI-generated response styled as a support ticket with ticket ID, faith/department badges, prayer text, and AI response
+7. Closing prayer generated separately with optional text-to-speech playback
+8. Optionally save to local history, star as favorite, or share via unique URL
+
+---
+
+## AI Workflow Architecture
+
+### Edge Function: pray
+
+The prayer system uses a single edge function with a 6-section modular architecture:
+
+- Section 1 — Rate Limiting: IP-based sliding window (10 requests/minute)
+- Section 2 — Detection Patterns: Regex catalog grouped by safety mode. Priority order: crisis > troll > off_topic > divine_attribution > scrupulosity > normal
+- Section 3 — Message Classifier: Pure function that takes a message and returns an InteractionMode, detectedSignals array, and appliedGuardrails array
+- Section 4 — Prompt Registry: Declarative catalog where ALL prompt text lives. Sub-sections: structural fragments (crisis rule, core), faith personas (6 traditions), department sub-prompts (18+ departments), category prompts (4 categories), hotline metadata, and safety mode overrides
+- Section 5 — PromptBuilder: Composable builder class containing ALL logic but no content. Methods: base, section, when, interpolate, build
+- Section 6 — Request Handler: Validates input, classifies + builds prompt, calls AI gateway, post-processes (troll prefix detection), generates closing prayer in parallel, logs analytics + safety signals (fire-and-forget), responds with reply + closingPrayer + mode
+
+### Prompt Composition
+
+The PromptBuilder strictly separates content (Section 4) from logic (Section 5). Prompts are composed as layers:
+
+Faith Persona (always present) + Core Rules (crisis rule, tone guidelines) + Department sub-prompt (if selected) + Category prompt (if selected) + Safety override (if mode is not normal) + Troll self-classify instruction (if mode is not crisis)
+
+This means Christianity + Saints Desk + Guidance + Scrupulosity detection produces a completely different prompt than Islam + Sufi + Complaint + Normal — all from the same composable registry.
+
+### Dual AI Calls
+
+Each prayer request triggers up to two AI calls in parallel:
+
+1. Main response — the agent persona responds to the prayer
+2. Closing prayer — a separate prompt generates a faith-appropriate closing prayer/reflection
+
+Closing prayers are skipped for crisis, troll, and off-topic modes.
+
+### AI Gateway
+
+AI calls use Google Gemini 3 Flash via Supabase Edge Functions. Rate limits (429) and upstream errors are caught and surfaced as themed error messages ("The lines are jammed").
+
+---
+
+## Safety & Moderation System
+
+### Hybrid Detection: Regex + AI Self-Classification
+
+The system uses a two-layer detection strategy:
+
+Layer 1 — Regex (instant): Pattern groups with strict priority ordering:
+
+| Priority | Mode | Example Triggers |
+|----------|------|-----------------|
+| 1 | Crisis | "want to die", "no reason to live", self-harm language |
+| 2 | Troll | Profanity, slurs, spam, gibberish, satanic trolling |
+| 3 | Off-Topic | Code requests, recipes, tech support, trivia |
+| 4 | Reality Anchor | "are you really God?", "this is a miracle" |
+| 5 | Scrupulosity | "unforgivable sin", "am I damned?", religious OCD |
+| 6 | Normal | Genuine prayers — everything else |
+
+Layer 2 — AI Self-Classification (catches subtle cases): Normal-mode prompts include a [TROLL] self-classify instruction. If the AI detects subtle mockery or bad-faith intent that regex missed, it prefixes its response with [TROLL]. The handler strips the prefix and reclassifies the interaction — all in a single API call with zero added latency.
+
+### Six Interaction Modes
+
+| Mode | Persona | UI Behavior | Closing Prayer |
+|------|---------|-------------|----------------|
+| Normal | Faith-specific agent | Full response + receipt card + share | Yes |
+| Crisis | Drops all satire — sincere only | 988 lifeline + Crisis Text Line | No |
+| Troll | Switchboard Operator | Playful absorption, archived to joke dept | No |
+| Off-Topic | Switchboard Operator | Warm redirect to earthly services | No |
+| Reality Anchor | Fourth-wall break | "I'm an AI comedy app, not God" | Yes |
+| Scrupulosity | Extra-gentle agent | No tough love, reassurance-first | Yes |
+
+### Troll Handling: Playful Absorption
+
+Instead of scolding or blocking trolls, the system absorbs the message into the hotline metaphor. The message is "routed" to a random department (Divine Spam Filter, Celestial Noise Desk, Department of Crossed Wires, etc.). A calm Switchboard Operator acknowledges the "atmospheric interference" and archives it. The door is always left open: "If something meaningful finds its way to the receiver, the switchboard is always open." Sign-off is branded to the selected faith.
+
+### Safety Signal Logging
+
+Every interaction logs to the safety_signals table: interaction_mode, detected_signals array, applied_guardrails array, and consent status. This creates an auditable record of moderation decisions without storing prayer text.
+
+---
+
+## Crisis Safety
+
+This app includes robust crisis detection. If a user expresses self-harm, suicidal thoughts, hopelessness, or any mental health crisis, the AI drops all satire and responds with genuine compassion, always including:
+
+- 988 Suicide & Crisis Lifeline (call or text 988)
+- Crisis Text Line (text HOME to 741741)
+
+A dedicated Crisis Resources page provides additional real helplines across 8 categories: Mental Health, LGBTQ+ Youth, Domestic Violence, Substance Abuse, Veterans, Human Rights, Hunger, Homelessness. The crisis page has zero analytics — no tracking scripts whatsoever.
+
+---
+
+## The Sincere Half — The Real World
+
+### Global Pain Index (/observatory)
+
+A regularly refreshed dashboard tracking global indicators of poverty, hunger, displacement, conflict, and mortality. No satire. Data from 10+ authoritative source systems, refreshed every 6 hours.
+
+Features:
+- Composite Pain Index (0–100) with six interpretive bands: Low Distress through Catastrophic
+- Category groupings: Conflict & Violence, Displacement & Exploitation, Health & Mortality, Poverty & Hunger, Natural Hazards, Humanitarian Response
+- Top drivers panel showing the 3 indicators contributing most to the current score
+- Admissibility badges classifying each data point: Authoritative, Signal, Derived
+- Category headline filters on each card acting as interactive filter shortcuts
+- Full methodology transparency including weights, score bands, and source links
+
+Context banner for direct visitors: "This page is part of Hold for Jesus, a satirical AI prayer hotline. The data here is real. The hotline is not."
+
+### AI Incident Archive (/incidents)
+
+A browsable archive of real AI harm incidents sourced from the AI Incident Database (AIID). Tracks total incidents, vulnerable population impact, trend direction, and top categories. Features searchable incident browser with debounced search, category filtering, severity signals, and harm domain classification. Includes methodology transparency and admissibility badges.
+
+### Crisis Resources (/crisis)
+
+Paired "Get Help" and "Give Help" resources across 8 categories with emergency banner featuring 988/911 direct dial. No tracking, no analytics. Cross-links to the Pain Index for broader context.
+
+### Transparency (/transparency)
+
+Full architecture and methodology documentation: the split-brain design philosophy, six faith traditions, AI workflow architecture, safety and moderation system, data pipeline details, AI incident pipeline, privacy architecture, and tech stack.
+
+---
+
+## Data Pipeline — Global Pain Index
+
+### Edge Function: suffering-index
+
+A serverless ETL pipeline with four layers:
+
+1. Source Adapters (13 active across 10 source systems) — each follows the same contract: fetch returns raw and canonical data with full provenance metadata
+2. Raw Records — immutable audit trail of every API response
+3. Canonical Entities — normalized schema with admissibility status, quality metadata, and lineage tracking
+4. Derived Scores — weighted composite index computed from normalized indicators
+
+### Source Systems
+
+| Source | Domain | Admissibility |
+|--------|--------|---------------|
+| World Bank (5 indicators) | Development | Authoritative |
+| UNHCR | Displacement | Authoritative |
+| Global Slavery Index | Slavery | Authoritative |
+| GDELT | Conflict | Signal Only |
+| UN SDG 16.1.1 | Conflict | Authoritative |
+| ACLED | Conflict | Authoritative |
+| WHO Neonatal | Health | Authoritative |
+| USGS Earthquakes | Disaster | Authoritative |
+| NASA FIRMS | Disaster | Authoritative |
+| UN OCHA/HDX | Humanitarian Catalog | Authoritative |
+| AI Incident Database | AI Harms | Authoritative |
+
+### Normalization
+
+Scores use a registry-driven weighted model stored in normalization_registry. Each indicator has baseline_min, baseline_max, direction (higher_worse or lower_worse), and weight. Raw values are min-max normalized to 0–1, direction-inverted where needed, and the composite score is a weighted average scaled to 0–100.
+
+### Data Quality
+
+Every canonical entity carries admissibility_status (authoritative, signal_only, derived, needs_review), admissibility_reasons array, quality metadata (source confidence, estimate/model/aggregate flags), and lineage (schema version, normalizer version, transform notes).
+
+### Refresh Cycle
+
+A pg_cron job triggers the edge function every 6 hours via pg_net. Results are cached in suffering_index and suffering_metrics tables for instant page loads.
+
+---
+
+## AI Incident Pipeline
+
+The AI Incident Archive ingests data from the AI Incident Database (AIID) through a dedicated adapter following the same pipeline pattern:
+
+1. AIID GraphQL API fetch
+2. Raw records (immutable audit trail)
+3. Canonical entities (ai_harm_observation kind)
+4. Derived vulnerability classification via 12-category keyword taxonomy
+
+Classification maps incidents to vulnerable populations (children, minorities, patients, etc.). Each incident also receives a harm domain (algorithmic bias, surveillance, automation error, deepfake/misuse, content recommendation, decision support) and severity signal (high/medium/low).
+
+Safeguards: SHA256 idempotency, max 3 categories per incident, 5,000 incident fetch guard, exponential backoff retries, and trend analysis (12-month window).
+
+---
+
+## Community Features
+
+### Prayer Wall (/community)
+
+Anonymous prayer submissions with emoji reactions (🙏 ❤️ 🕯️ 🍃). Moderated and stored in database. Session-based duplicate reaction prevention. Designed to be ephemeral — prayers fade after 24 hours.
+
+### Global Prayer Board (/community)
+
+Community causes with voice counts. Users add their voice to global issues. Session-based one-vote-per-issue enforcement via database function.
+
+### Shareable Receipts
+
+Call transcripts can be shared via unique URLs. Full receipt data (faith, department, prayer, response, ticket ID, hold time, agent name) is stored in shared_receipts table.
+
+---
+
+## Privacy Architecture
+
+- No accounts required — the entire app works without authentication
+- Prayer text is never stored on the server — responses are generated, returned, and discarded
+- Local-only persistence — prayer history, favorites, and preferences use Zustand stores backed by localStorage
+- Prayer Wall entries are ephemeral — designed to fade after 24 hours
+- Global activity indicators (live feed, volume indicator) use only broad city/region labels
+- Crisis page has zero analytics — no tracking scripts
+- Safety signals log mode and metadata only — never the prayer content itself
+
+---
+
+## Accessibility
+
+- Skip-to-content navigation link
+- Semantic HTML elements (section, main, nav) with ARIA labels
+- aria-pressed on toggle/selection controls
+- aria-current="step" on multi-step wizard
+- prefers-reduced-motion media query disables animations globally
+- Conditional autoFocus only on pointer-capable devices
+- Global Error Boundary with themed fallback UI
+
+---
+
+## Important Notes
+
+- This is an entertainment/comedy application, NOT a religious service or real hotline
+- No prayers are stored on servers — community features use moderated public submissions only
+- AI responses should not be taken as spiritual counsel or professional advice
+- All faiths are treated with equal respect; humor targets corporate bureaucracy, not beliefs
+- User preferences, history, and favorites stored in browser localStorage only
+
+---
+
+## Pages
+
+- [Home](https://holdforjesus.com/) — Landing page with hero, How It Works, live switchboard feed, prayer volume indicator, verse of the day, community CTA
+- [Pray](https://holdforjesus.com/pray) — 3-step prayer wizard with hold screen, typing animation, and AI call transcript response
+- [Community](https://holdforjesus.com/community) — Prayer Wall (submit & react to prayers) and Global Prayer Board (community causes)
+- [History](https://holdforjesus.com/history) — Local call history with faith/department badges, clickable to restore past responses
+- [Global Pain Index](https://holdforjesus.com/observatory) — Regularly refreshed humanitarian data dashboard with composite suffering score
+- [AI Incidents](https://holdforjesus.com/incidents) — Browsable archive of real AI harm incidents from the AI Incident Database
+- [Crisis Resources](https://holdforjesus.com/crisis) — Real crisis helplines and mental health resources across 8 categories
+- [Transparency](https://holdforjesus.com/transparency) — Full architecture, methodology, and safety documentation
+- [About](https://holdforjesus.com/about) — About the project, mission, split-brain design philosophy, and ethical AI considerations
+- [Privacy](https://holdforjesus.com/privacy) — Privacy policy
+- [Terms](https://holdforjesus.com/terms) — Terms of service
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, TypeScript, Vite |
+| Styling | Tailwind CSS, shadcn/ui, CSS design tokens (HSL) |
+| Animation | Framer Motion |
+| State | Zustand with localStorage persistence |
+| Audio | Web Audio API (procedural hold music: Harps, Gospel, Gregorian) |
+| Backend | Supabase Edge Functions (Deno) |
+| AI | Google Gemini 3 Flash |
+| Database | PostgreSQL via Supabase |
+| Scheduling | pg_cron + pg_net (6-hour data refresh cycle) |
+| Error Handling | Global Error Boundary with themed fallback UI |
+| SEO | react-helmet-async, semantic HTML, Open Graph, Twitter Cards |
+| Accessibility | ARIA attributes, skip navigation, prefers-reduced-motion |
+
+---
+
+## Topics & Keywords
+
+AI spiritual guidance, conversational AI ethics, multi-faith AI, prayer chatbot, satirical web app, comedy religion app, AI and religion, responsible AI design, crisis detection AI, mental health referral system, interfaith dialogue, spiritual humor, split-brain architecture, hybrid moderation system, prompt composition, AI safety guardrails, humanitarian data pipeline, Global Pain Index, AI Incident Database, ETL pipeline, data provenance, admissibility classification, troll absorption, scrupulosity detection, divine attribution detection, privacy-first design, accessibility, WCAG compliance, ARIA attributes

@@ -1,0 +1,16 @@
+{
+  "name": "Hold for Jesus — The Divine Multi-Faith Prayer Hotline",
+  "short_name": "Hold for Jesus",
+  "description": "The comedic multi-faith prayer hotline. Submit your prayer and receive AI-powered heavenly guidance. Free, anonymous, 24/7.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0e8d8",
+  "theme_color": "#c8962e",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

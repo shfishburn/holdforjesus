@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hold for Jesus — AI Multi-Faith Prayer Hotline</title>
+    <!-- Generic description removed — Helmet injects per-route descriptions,
+         baked into static HTML by react-snap. Keeping a generic one here causes
+         iMessage/Facebook/Slack to pick the first (generic) tag. -->
+    <meta name="author" content="Hold for Jesus" />
+    <meta name="keywords" content="prayer hotline, AI prayer, multi-faith chatbot, comedy religion, spiritual humor, hold for jesus, 1-800-JESUS, prayer wall, crisis support, interfaith AI, conversational AI ethics" />
+
+    <!-- OG / Twitter tags are injected per-route by React Helmet Async and baked
+         into static HTML by react-snap at build time. Keeping them out of this
+         template prevents duplicate tags that cause crawlers (iMessage, Facebook,
+         Slack) to pick up the generic fallback instead of page-specific metadata. -->
+
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#c8962e" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Hold for Jesus — AI Multi-Faith Prayer Hotline",
+      "alternateName": "Hold for Jesus",
+      "description": "A comedic AI prayer hotline. Choose from 6 faith traditions, submit a prayer, hold for divine customer service, and receive an AI-generated response. Features a community prayer wall, global prayer board, shareable call transcripts, crisis detection with 988 referrals, and full call history.",
+      "url": "https://holdforjesus.com/",
+      "applicationCategory": "EntertainmentApplication",
+      "operatingSystem": "Web",
+      "inLanguage": "en",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": "Multi-faith AI prayer responses (Christianity Islam Judaism Hinduism Buddhism Secular), Community prayer wall with reactions, Global prayer board with voice counts, Shareable call transcripts, Crisis detection with 988 and 741741 referrals, Prayer history with faith and department badges, Favorites, Text-to-speech closing prayers, Dark mode, Responsive mobile-first design"
+    }
+    </script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

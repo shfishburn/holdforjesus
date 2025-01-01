@@ -1,0 +1,13 @@
+project_id = "holdforjesus"
+
+[functions.pray]
+verify_jwt = false
+
+[functions.tts]
+verify_jwt = false
+
+[functions.ai-incidents]
+verify_jwt = false
+
+[functions.migrate-data]
+verify_jwt = false

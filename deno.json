@@ -1,0 +1,22 @@
+{
+  "fmt": {
+    "lineWidth": 100,
+    "indentWidth": 2,
+    "singleQuote": false,
+    "semiColons": true,
+    "exclude": ["node_modules", "dist"]
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no-explicit-any"]
+    },
+    "exclude": ["node_modules", "dist"]
+  },
+  "tasks": {
+    "fmt": "deno fmt supabase/functions",
+    "fmt:check": "deno fmt --check supabase/functions",
+    "lint": "deno lint supabase/functions",
+    "check": "deno check supabase/functions/*/index.ts"
+  }
+}

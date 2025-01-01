@@ -1,0 +1,1 @@
+DELETE FROM suffering_index;
