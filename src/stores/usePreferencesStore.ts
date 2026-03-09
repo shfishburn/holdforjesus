@@ -10,11 +10,15 @@ interface PreferencesState {
   category: PrayerCategory;
   researchConsent: boolean;
   shareToWall: boolean;
+  analyticsConsent: boolean;
+  analyticsConsentPrompted: boolean;
   setFaith: (id: FaithId) => void;
   setDepartment: (dept: string) => void;
   setCategory: (cat: PrayerCategory) => void;
   setResearchConsent: (consent: boolean) => void;
   setShareToWall: (share: boolean) => void;
+  setAnalyticsConsent: (consent: boolean) => void;
+  setAnalyticsConsentPrompted: (prompted: boolean) => void;
 }
 
 export const usePreferencesStore = create<PreferencesState>()(
@@ -25,11 +29,16 @@ export const usePreferencesStore = create<PreferencesState>()(
       category: null,
       researchConsent: false,
       shareToWall: true,
+      analyticsConsent: false,
+      analyticsConsentPrompted: false,
       setFaith: (id) => set({ faithId: id, department: "general" }),
       setDepartment: (dept) => set({ department: dept }),
       setCategory: (cat) => set({ category: cat }),
       setResearchConsent: (consent) => set({ researchConsent: consent }),
       setShareToWall: (share) => set({ shareToWall: share }),
+      setAnalyticsConsent: (consent) =>
+        set({ analyticsConsent: consent, analyticsConsentPrompted: true }),
+      setAnalyticsConsentPrompted: (prompted) => set({ analyticsConsentPrompted: prompted }),
     }),
     {
       name: "hotline-preferences",

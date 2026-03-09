@@ -16,6 +16,7 @@ import VerseOfTheDay from "@/components/VerseOfTheDay";
 import { useToast } from "@/hooks/use-toast";
 import { useRateLimit } from "@/hooks/useRateLimit";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics.ts";
 import { FAITHS, getFaith } from "@/lib/faiths";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
 import { usePrayerHistoryStore } from "@/stores/usePrayerHistoryStore";
@@ -125,11 +126,24 @@ const PrayerPage = () => {
       setResponseMode(data?.mode || "normal");
       const record = addRecord(msg, reply, faithId, dept, cat || undefined);
       setCurrentRecordId(record.id);
+      trackEvent("prayer_response_received", {
+        faith_id: faithId,
+        department: dept,
+        category: cat,
+        response_mode: data?.mode || "normal",
+        has_closing_prayer: Boolean(data?.closingPrayer),
+      });
     } catch (err: unknown) {
       console.error("Prayer error:", err);
       const info = getErrorInfo(err);
       setLastError(info.message);
       setPhase("error");
+      trackEvent("prayer_response_error", {
+        faith_id: faithId,
+        department: dept,
+        category: cat,
+        error_title: info.title,
+      });
     } finally {
       setLoading(false);
     }
@@ -144,10 +158,24 @@ const PrayerPage = () => {
       });
       return;
     }
+    trackEvent("prayer_submitted", {
+      faith_id: faithId,
+      department,
+      category,
+      prayer_length: prayer.trim().length,
+      share_to_wall: shareToWall,
+      research_consent: researchConsent,
+    });
     await callPrayer(prayer.trim(), department, category);
   };
 
   const handleTransfer = (newDept: string) => {
+    trackEvent("prayer_transferred", {
+      faith_id: faithId,
+      from_department: department,
+      to_department: newDept,
+      category,
+    });
     setDepartment(newDept);
     callPrayer(prayer.trim() || "Please help me", newDept, category);
   };
@@ -202,7 +230,25 @@ const PrayerPage = () => {
   const handleRate = (rating: "up" | "down") => {
     if (currentRecordId) {
       rateRecord(currentRecordId, rating);
+      trackEvent("response_rated", {
+        faith_id: faithId,
+        department,
+        category,
+        rating,
+      });
     }
+  };
+
+  const handleToggleFavorite = () => {
+    if (!currentRecordId) return;
+    const nextFavorited = !isFavorite(currentRecordId);
+    toggleFavorite(currentRecordId);
+    trackEvent("response_favorite_toggled", {
+      faith_id: faithId,
+      department,
+      category,
+      favorited: nextFavorited,
+    });
   };
 
   const isStep = phase === "step1" || phase === "step2" || phase === "step3";
@@ -287,7 +333,7 @@ const PrayerPage = () => {
               }}
               onRate={handleRate}
               onTransfer={handleTransfer}
-              onToggleFavorite={currentRecordId ? () => toggleFavorite(currentRecordId) : undefined}
+              onToggleFavorite={currentRecordId ? handleToggleFavorite : undefined}
               isFavorited={currentRecordId ? isFavorite(currentRecordId) : false}
             />
           </motion.div>

@@ -15,6 +15,8 @@ export const PreferencesSchema = z.object({
   category: z.enum(["gratitude", "guidance", "complaint", "emergency"]).nullable().catch(null),
   researchConsent: z.boolean().catch(false),
   shareToWall: z.boolean().catch(true),
+  analyticsConsent: z.boolean().catch(false),
+  analyticsConsentPrompted: z.boolean().catch(false),
 });
 
 export type Preferences = z.infer<typeof PreferencesSchema>;

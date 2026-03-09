@@ -9,6 +9,7 @@ import Seo from "@/components/Seo.tsx";
 import SufferingTicker from "@/components/SufferingTicker";
 import { Button } from "@/components/ui/button";
 import VerseOfTheDay from "@/components/VerseOfTheDay";
+import { trackEvent } from "@/lib/analytics.ts";
 import { getFaith } from "@/lib/faiths";
 import { usePreferencesStore } from "@/stores/usePreferencesStore";
 
@@ -81,7 +82,10 @@ const LandingPage = () => {
           <motion.div className="mt-6" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               size="lg"
-              onClick={() => navigate("/pray")}
+              onClick={() => {
+                trackEvent("cta_clicked", { cta: "submit_prayer_hero" });
+                navigate("/pray");
+              }}
               className="text-xl px-12 py-7 gap-3 rounded-full shadow-xl"
             >
               📞 Submit a Prayer
@@ -113,7 +117,14 @@ const LandingPage = () => {
             <p className="text-sm text-muted-foreground">
               Light candles, share prayers, and add your voice to global causes.
             </p>
-            <Button variant="outline" onClick={() => navigate("/community")} className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                trackEvent("cta_clicked", { cta: "community_wall" });
+                navigate("/community");
+              }}
+              className="gap-2"
+            >
               Visit the Community →
             </Button>
           </div>
@@ -141,6 +152,7 @@ const LandingPage = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Link
                 to="/crisis"
+                onClick={() => trackEvent("cta_clicked", { cta: "crisis_resources" })}
                 className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline transition-colors"
               >
                 📞 Crisis Resources & Ways to Give →
@@ -148,6 +160,7 @@ const LandingPage = () => {
               <span className="text-muted-foreground/40 hidden sm:inline">·</span>
               <Link
                 to="/observatory"
+                onClick={() => trackEvent("cta_clicked", { cta: "global_pain_index" })}
                 className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:underline transition-colors"
               >
                 🌍 Global Pain Index →

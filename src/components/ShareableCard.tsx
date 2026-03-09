@@ -8,6 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { trackEvent } from "@/lib/analytics.ts";
 import type { FaithConfig } from "@/lib/faiths";
 
 interface ShareableCardProps {
@@ -170,6 +171,10 @@ const ShareableCard = (props: ShareableCardProps) => {
     a.click();
     URL.revokeObjectURL(url);
     toast({ title: "📥 Downloaded!", description: "Prayer card saved." });
+    trackEvent("share_card_downloaded", {
+      faith_id: props.faith.id,
+      department: props.currentDepartment,
+    });
   };
 
   const handleShare = async () => {
@@ -179,6 +184,11 @@ const ShareableCard = (props: ShareableCardProps) => {
     try {
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: props.faith.hotlineName });
+        trackEvent("share_card_shared", {
+          faith_id: props.faith.id,
+          department: props.currentDepartment,
+          method: "native_share",
+        });
       } else {
         await handleDownload();
       }

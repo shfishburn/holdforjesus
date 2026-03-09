@@ -7,6 +7,7 @@ import ShareableCard from "@/components/ShareableCard";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useDingSound } from "@/hooks/useDingSound";
+import { trackEvent } from "@/lib/analytics.ts";
 import type { FaithConfig } from "@/lib/faiths";
 import { formatBold } from "@/lib/formatBold";
 
@@ -75,6 +76,11 @@ const ResponseScreen = ({
     try {
       if (navigator.share) {
         await navigator.share({ title: faith.hotlineName, text });
+        trackEvent("response_shared", {
+          faith_id: faith.id,
+          department: currentDepartment,
+          method: "native_share",
+        });
         return;
       }
     } catch {
@@ -83,11 +89,20 @@ const ResponseScreen = ({
     try {
       await navigator.clipboard.writeText(text);
       toast({ title: "Copied!", description: "Response copied to clipboard." });
+      trackEvent("response_shared", {
+        faith_id: faith.id,
+        department: currentDepartment,
+        method: "clipboard",
+      });
     } catch {
       toast({
         title: "Couldn't share",
         description: "Please copy the text manually.",
         variant: "destructive",
+      });
+      trackEvent("response_share_failed", {
+        faith_id: faith.id,
+        department: currentDepartment,
       });
     }
   };
@@ -99,6 +114,10 @@ const ResponseScreen = ({
       toast({
         title: "📋 Transcript Copied!",
         description: "Prayer and response copied to clipboard.",
+      });
+      trackEvent("transcript_copied", {
+        faith_id: faith.id,
+        department: currentDepartment,
       });
     } catch {
       // fallback
@@ -112,6 +131,24 @@ const ResponseScreen = ({
       title: r === "up" ? "🙌 Blessed!" : "😔 Noted",
       description: r === "up" ? "Glad this landed." : "We'll relay your feedback.",
     });
+  };
+
+  const handleHangUp = () => {
+    trackEvent("response_action_clicked", {
+      faith_id: faith.id,
+      department: currentDepartment,
+      action: "hang_up",
+    });
+    onHangUp();
+  };
+
+  const handleCallAgain = () => {
+    trackEvent("response_action_clicked", {
+      faith_id: faith.id,
+      department: currentDepartment,
+      action: "call_again",
+    });
+    onCallAgain();
   };
 
   return (
@@ -275,7 +312,16 @@ const ResponseScreen = ({
         >
           <p className="text-sm font-semibold text-accent">
             🆘 If you or someone you know is in crisis, call or text{" "}
-            <a href="tel:988" className="underline font-bold">
+            <a
+              href="tel:988"
+              className="underline font-bold"
+              onClick={() =>
+                trackEvent("crisis_hotline_clicked", {
+                  source: "response_screen",
+                  faith_id: faith.id,
+                })
+              }
+            >
               988
             </a>{" "}
             (Suicide & Crisis Lifeline) anytime.
@@ -362,12 +408,12 @@ const ResponseScreen = ({
           </span>
           <div className="flex gap-2 flex-wrap">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="outline" size="sm" onClick={onHangUp} className="gap-2">
+              <Button variant="outline" size="sm" onClick={handleHangUp} className="gap-2">
                 📵 Hang Up
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button size="sm" onClick={onCallAgain} className="gap-2">
+              <Button size="sm" onClick={handleCallAgain} className="gap-2">
                 📞 Try Again
               </Button>
             </motion.div>

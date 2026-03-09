@@ -101,7 +101,7 @@ const CrisisPage = () => {
             </p>
             <p className="text-xs text-muted-foreground">
               All crisis services listed are free and confidential. Charity links go directly to
-              verified organizations. This page contains no tracking or analytics.
+              verified organizations. Optional anonymous analytics only runs with explicit opt-in.
             </p>
           </div>
 

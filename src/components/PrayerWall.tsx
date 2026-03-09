@@ -278,7 +278,8 @@ const PrayerWall = () => {
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        Anonymous prayers shared by visitors. No accounts, no tracking.
+        Anonymous prayers shared by visitors. No accounts. Optional anonymous analytics only with
+        opt-in consent.
         <br />
         <span className="text-muted-foreground/60">Prayers fade after 24 hours.</span>
       </p>

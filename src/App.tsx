@@ -2,11 +2,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { lazy, Suspense, useEffect } from "react";
 import { HelmetProvider } from "react-helmet-async";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner.tsx";
 import { Toaster } from "@/components/ui/toaster.tsx";
 import { TooltipProvider } from "@/components/ui/tooltip.tsx";
+import { trackPageView } from "@/lib/analytics.ts";
 import { useFontSizeStore } from "@/stores/useFontSizeStore.ts";
+import AnalyticsConsentBanner from "./components/AnalyticsConsentBanner.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import Footer from "./components/Footer.tsx";
 import Header from "./components/Header.tsx";
@@ -33,6 +35,21 @@ const PageFallback = () => (
   </div>
 );
 
+const AnalyticsTracker = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Delay one frame so react-helmet-async can flush <title> before we read it
+    const id = requestAnimationFrame(() => {
+      const pagePath = `${location.pathname}${location.search}`;
+      trackPageView(pagePath);
+    });
+    return () => cancelAnimationFrame(id);
+  }, [location.pathname, location.search]);
+
+  return null;
+};
+
 const App = () => {
   const fontSize = useFontSizeStore((s) => s.fontSize);
 
@@ -50,7 +67,9 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <AnalyticsTracker />
               <div className="min-h-screen flex flex-col">
+                <AnalyticsConsentBanner />
                 <Header />
                 <main id="main-content" className="flex-1">
                   <ErrorBoundary>
