@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Analytics } from "@vercel/analytics/react";
 import { ThemeProvider } from "next-themes";
 import { lazy, Suspense, useEffect } from "react";
 import { HelmetProvider } from "react-helmet-async";
@@ -6,6 +7,7 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner.tsx";
 import { Toaster } from "@/components/ui/toaster.tsx";
 import { TooltipProvider } from "@/components/ui/tooltip.tsx";
+import { isReactSnap } from "@/integrations/supabase/client.ts";
 import { trackPageView } from "@/lib/analytics.ts";
 import { useFontSizeStore } from "@/stores/useFontSizeStore.ts";
 import { usePreferencesStore } from "@/stores/usePreferencesStore.ts";
@@ -96,6 +98,7 @@ const App = () => {
                 </main>
                 <Footer />
               </div>
+              {!isReactSnap && <Analytics />}
             </BrowserRouter>
           </TooltipProvider>
         </QueryClientProvider>
