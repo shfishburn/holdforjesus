@@ -1,5 +1,3 @@
-import { usePreferencesStore } from "@/stores/usePreferencesStore.ts";
-
 const GA_MEASUREMENT_ID = "G-2FDVE014T8";
 const GTAG_SRC = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
 
@@ -34,9 +32,6 @@ type AnalyticsValue = string | number | boolean | null | undefined;
 type AnalyticsParams = Record<string, AnalyticsValue>;
 
 export function trackEvent(eventName: string, params: AnalyticsParams = {}) {
-  const analyticsConsent = usePreferencesStore.getState().analyticsConsent;
-  if (!analyticsConsent) return;
-
   ensureGtagScript();
 
   globalThis.gtag!("event", eventName, {

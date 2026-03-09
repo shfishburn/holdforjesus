@@ -10,8 +10,7 @@ import { TooltipProvider } from "@/components/ui/tooltip.tsx";
 import { isReactSnap } from "@/integrations/supabase/client.ts";
 import { trackPageView } from "@/lib/analytics.ts";
 import { useFontSizeStore } from "@/stores/useFontSizeStore.ts";
-import { usePreferencesStore } from "@/stores/usePreferencesStore.ts";
-import AnalyticsConsentBanner from "./components/AnalyticsConsentBanner.tsx";
+
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import Footer from "./components/Footer.tsx";
 import Header from "./components/Header.tsx";
@@ -40,17 +39,15 @@ const PageFallback = () => (
 
 const AnalyticsTracker = () => {
   const location = useLocation();
-  const analyticsConsent = usePreferencesStore((s) => s.analyticsConsent);
 
   useEffect(() => {
-    if (!analyticsConsent) return;
     // Delay one frame so react-helmet-async can flush <title> before we read it
     const id = requestAnimationFrame(() => {
       const pagePath = `${location.pathname}${location.search}`;
       trackPageView(pagePath);
     });
     return () => cancelAnimationFrame(id);
-  }, [location.pathname, location.search, analyticsConsent]);
+  }, [location.pathname, location.search]);
 
   return null;
 };
@@ -74,7 +71,6 @@ const App = () => {
             <BrowserRouter>
               <AnalyticsTracker />
               <div className="min-h-screen flex flex-col">
-                <AnalyticsConsentBanner />
                 <Header />
                 <main id="main-content" className="flex-1">
                   <ErrorBoundary>

@@ -1,12 +1,7 @@
 import { motion } from "framer-motion";
 import Seo from "@/components/Seo.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { usePreferencesStore } from "@/stores/usePreferencesStore.ts";
 
 const PrivacyPage = () => {
-  const analyticsConsent = usePreferencesStore((s) => s.analyticsConsent);
-  const setAnalyticsConsent = usePreferencesStore((s) => s.setAnalyticsConsent);
-
   return (
     <>
       <Seo
@@ -45,37 +40,13 @@ const PrivacyPage = () => {
               choose to post to the Prayer Wall, that submitted wall text is stored server-side.
             </p>
 
-            <h2 className="font-bold text-lg text-foreground mt-6">Cookies</h2>
+            <h2 className="font-bold text-lg text-foreground mt-6">Cookies & Analytics</h2>
             <p>
               We use localStorage to remember your preferences (faith, department) and call history.
-              We do not use ad-tech trackers. Optional anonymous analytics (GA4) only runs after
-              explicit opt-in.
+              We do not use ad-tech trackers. Anonymous analytics (GA4) collects page views and
+              usage events to help improve the experience. No personally identifiable information is
+              collected.
             </p>
-
-            <h2 className="font-bold text-lg text-foreground mt-6">Analytics Consent</h2>
-            <p>
-              You can change analytics consent at any time. This affects page and event analytics
-              for product improvement.
-            </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                size="sm"
-                variant={analyticsConsent ? "default" : "outline"}
-                onClick={() => setAnalyticsConsent(true)}
-              >
-                Enable Analytics
-              </Button>
-              <Button
-                size="sm"
-                variant={!analyticsConsent ? "default" : "outline"}
-                onClick={() => setAnalyticsConsent(false)}
-              >
-                Disable Analytics
-              </Button>
-              <span className="text-xs text-muted-foreground">
-                Current status: {analyticsConsent ? "Enabled" : "Disabled"}
-              </span>
-            </div>
 
             <h2 className="font-bold text-lg text-foreground mt-6">AI Processing</h2>
             <p>
