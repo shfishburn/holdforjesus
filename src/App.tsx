@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster.tsx";
 import { TooltipProvider } from "@/components/ui/tooltip.tsx";
 import { trackPageView } from "@/lib/analytics.ts";
 import { useFontSizeStore } from "@/stores/useFontSizeStore.ts";
+import { usePreferencesStore } from "@/stores/usePreferencesStore.ts";
 import AnalyticsConsentBanner from "./components/AnalyticsConsentBanner.tsx";
 import ErrorBoundary from "./components/ErrorBoundary.tsx";
 import Footer from "./components/Footer.tsx";
@@ -37,15 +38,17 @@ const PageFallback = () => (
 
 const AnalyticsTracker = () => {
   const location = useLocation();
+  const analyticsConsent = usePreferencesStore((s) => s.analyticsConsent);
 
   useEffect(() => {
+    if (!analyticsConsent) return;
     // Delay one frame so react-helmet-async can flush <title> before we read it
     const id = requestAnimationFrame(() => {
       const pagePath = `${location.pathname}${location.search}`;
       trackPageView(pagePath);
     });
     return () => cancelAnimationFrame(id);
-  }, [location.pathname, location.search]);
+  }, [location.pathname, location.search, analyticsConsent]);
 
   return null;
 };

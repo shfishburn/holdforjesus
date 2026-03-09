@@ -5,15 +5,28 @@ const GTAG_SRC = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_I
 
 let gtagScriptLoaded = false;
 
+/** Bootstrap the dataLayer + gtag stub if the inline HTML snippet is absent. */
+function ensureGtagStub() {
+  if (!globalThis.dataLayer) {
+    globalThis.dataLayer = [];
+  }
+  if (typeof globalThis.gtag !== "function") {
+    globalThis.gtag = (...args: unknown[]) => {
+      globalThis.dataLayer.push(args);
+    };
+  }
+}
+
 function ensureGtagScript() {
+  ensureGtagStub();
   if (gtagScriptLoaded) return;
   gtagScriptLoaded = true;
   const script = document.createElement("script");
   script.async = true;
   script.src = GTAG_SRC;
   document.head.appendChild(script);
-  globalThis.gtag?.("js", new Date());
-  globalThis.gtag?.("config", GA_MEASUREMENT_ID, { send_page_view: false });
+  globalThis.gtag!("js", new Date());
+  globalThis.gtag!("config", GA_MEASUREMENT_ID, { send_page_view: false });
 }
 
 type AnalyticsValue = string | number | boolean | null | undefined;
@@ -22,13 +35,11 @@ type AnalyticsParams = Record<string, AnalyticsValue>;
 
 export function trackEvent(eventName: string, params: AnalyticsParams = {}) {
   const analyticsConsent = usePreferencesStore.getState().analyticsConsent;
-  if (!analyticsConsent || typeof globalThis.gtag !== "function") {
-    return;
-  }
+  if (!analyticsConsent) return;
 
   ensureGtagScript();
 
-  globalThis.gtag("event", eventName, {
+  globalThis.gtag!("event", eventName, {
     ...params,
     send_to: GA_MEASUREMENT_ID,
   });
